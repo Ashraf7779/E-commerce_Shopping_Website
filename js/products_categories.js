@@ -13,7 +13,7 @@ const productData = {
   itemNames: ['Collar Kurta', 'Lenovo LOQ 2024, Intel Core i7', 'Noise Airwave Max 4 Wireless Headphones', 'Victorinox Stainless Steel Watch', 'LEQTRONIQ Digital Camera', 'iPhone 16 Pro Max 256 GB 5G Mobile Phone', 'Haier 596 L, Wi-Fi enabled Water Dispenser Frost Free', 'Apple AirPods 4 Wireless Earbuds, Bluetooth Headphones', 'Samsung Galaxy Tab S10 FE, S Pen in-Box, 27.7 cm (10.9 inch) LCD Display', 'Logitech G502 X Lightspeed Plus Wireless RGB Gaming Mouse - with LIGHTFORCE', 'LG 15 Kg, AI Direct Drive Technology, Wi-Fi, Steam Fully Automatic Front-Loading Washing Machine', 'Hitachi 2 Ton Class 5 Star AC, 4-Way Swing, ice Clean, Xpandable+', 'JBL Go 4, Wireless Ultra Portable Bluetooth Speaker', 'Karatcart Women Green American Diamond Stud Earrings', 'ZAVERI PEARLS Ethnic Kundan & Pearls Multi Layers Bridal Necklace Set For Women', 'Panasonic 23L Convection Microwave Oven(NN-CT353BFDG,Black Mirror, 360° Heat Wrap, Magic Grill)', 'Sony PS5® Console Video Game Digital - Fortnite Bundle (Slim)', 'ShopMahal Brand - Myx Womens Embroidered Kurta Pant Set with Organza Dupatta', 'Madame Embossed Cotton Blend Coffee Brown Top for Women', 'ShopMahal Womens Woven Design Ethnic Motif Georgette Kanjeevaram Saree With Unstiched Blouse Piece', 'Campus Artemis Mens Lace-Up Running Shoes', 'U.S. POLO ASSN. Mens Brown Solid Mid Rise Cotton Button Slim Fit Trousers', 'MANQ Mens Slim Fit Single Breasted Blazer', 'Olivia Burton Ultra Slim Qtz Basic Dial Womens Watch', 'Conbre BulbXR 2MP Full HD Indoor Wireless WiFi CCTV Security Camera | Motion Tracking', 'Storio Rechargeable Toys Talking Cactus Baby Toys for Kids Dancing', 'HUDA GIRL Beauty Rose Gold Remastered + Nude Edition Eyeshadow Palette Combo Kit - 36 Matte and Shimmer Finishes, Includes Black Eyeshadow', 'KALP 2025 Dated Planner Kit | A5, 400 Pages'],
   prices: [550, 99990, 1699, 106240, 15999, 122900, 69980, 17881, 53999, 12495, 86207, 54990, 3699, 299, 368, 10590, 44990, 1499, 1299, 1699, 1199, 2599, 2374, 8800, 1299, 365, 299, 1299],
   images: [
-    'assests/kurta.webp',
+    'assests/Kurta.webp',
     'assests/Laptop_Lenovo.webp',
     'assests/Headphone_Noise.webp',
     'assests/Watch_Victorinox.webp',
@@ -43,7 +43,7 @@ const productData = {
     'assests/KALP_book.webp',
   ],
   categories: [
-    ['dress', 'men-wear'], // Collar Kurta [kurta]
+    ['dress', 'men-wear'], // Collar Kurta
     ['electronics'], 
     ['electronics'], // Noise Airwave Max 4 Wireless Headphones
     ['accessories'], // Victorinox Stainless Steel Watch
