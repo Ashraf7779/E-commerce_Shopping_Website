@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmation - ShopMahal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assests/SM_logo_BGR.webp">
+  <style>
+    .confirmation-container {
+      max-width: 600px;
+      margin: 100px auto;
+      padding: 20px;
+      text-align: center;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .confirmation-container h2 {
+      color: black;
+    }
+    .tick-animation {
+      font-size: 80px;
+      color: #28a745;
+      animation: bounce 1s infinite;
+    }
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-20px); }
+      60% { transform: translateY(-10px); }
+    }
+    button {
+      padding: 10px 20px;
+      background: #8e44ad;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #6c3483;
+      transform: scale(1.03);
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <header>
+      <div class="header-container">
+        <div class="logo">
+          <img src="assests/SM_logo_BGR.png" alt="ShopMahal Logo" width="100px" height="100px">
+        </div>
+        <div class="logotxt">
+          <p>𝕊𝕙𝕠𝕡𝕄𝕒𝕙𝕒𝕝</p>
+        </div>
+        <button class="nav-toggle" aria-label="Toggle navigation">
+          <span class="hamburger"></span>
+        </button>
+        <nav class="nav-menu">
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="cart.html">Cart (<span id="cart-count">0</span>)</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <div class="confirmation-container">
+        <div class="tick-animation">✔</div>
+        <h2>Thank You, Your Order is Successfully Placed!</h2>
+        <button onclick="continueShopping()">Continue Shopping</button>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2025 ShopMahal</p>
+    </footer>
+  </div>
+
+  <!-- Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/home.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let currentUser = localStorage.getItem('currentUser') || 'guest';
+      localStorage.removeItem(`checkoutCart_${currentUser}`);
+      localStorage.removeItem(`checkoutData_${currentUser}`);
+      localStorage.removeItem(`cart_${currentUser}`);
+
+      updateCartCount();
+
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 }
+      });
+    });
+
+    window.continueShopping = function() {
+      window.location.href = 'index.html';
+    };
+  </script>
+</body>
+</html>

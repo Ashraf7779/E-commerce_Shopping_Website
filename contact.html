@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - ShopMahal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .need-help-section {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    .need-help-btn {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    .need-help-btn:hover {
+      background-color: #45a049;
+    }
+    .help-options {
+      display: none;
+      margin-top: 1rem;
+      padding: 1.5rem;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+      max-width: 600px; /* Increased width to match other boxes */
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .help-options p {
+      margin: 0.75rem 0;
+      font-size: 1.2rem; /* Larger font size */
+    }
+    .help-options .contact-number {
+      font-size: 1.4rem; /* Even larger for phone number */
+      font-weight: bold;
+    }
+    .help-options textarea {
+      width: 100%;
+      min-height: 120px;
+      margin-top: 1rem;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1.1rem;
+    }
+    .help-options button {
+      background-color: #7b35abdf;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-size: 1.1rem;
+    }
+    .help-options button:hover {
+      background-color: #006d93;
+    }
+    .success-message {
+      color: #4CAF50;
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <header>
+      <div class="header-container">
+        <div class="logo">
+          <img src="assests/SM_logo_BGR.png" alt="ShopMahal Logo" width="100px" height="100px">
+        </div>
+
+        <div class="logotxt">
+          <p>𝕊𝕙𝕠𝕡𝕄𝕒𝕙𝕒𝕝</p>
+        </div>
+        
+        <button class="nav-toggle" aria-label="Toggle navigation">
+          <span class="hamburger"></span>
+        </button>
+
+        <nav class="nav-menu">
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="cart.html">Cart (<span id="cart-count">0</span>)</a></li>
+            <li class="dropdown">
+              <a href="products.html" class="dropbtn">Products</a>
+              <ul class="dropdown-content">
+                <li><a href="electronics.html">Electronics</a></li>
+                <li><a href="homegadgets.html">Home Gadgets</a></li>
+                <li><a href="dress.html">Dress</a></li>
+                <li><a href="women_wear.html">Women Wear</a></li>
+                <li><a href="men_wear.html">Men Wear</a></li>
+                <li><a href="kids_wear.html">Kids Wear</a></li>
+                <li><a href="suits.html">Suits</a></li>
+                <li><a href="accessories.html">Accessories</a></li>
+                <li><a href="footwear.htm">Footwear</a></li>
+                <li><a href="kids.html">Kids Toys</a></li>
+                <li><a href="beauty.html">Beauty</a></li>
+                <li><a href="jewellery.html">Jewelry</a></li>
+                <li><a href="sports_fitness.html">Sports & Fitness</a></li>
+                <li><a href="books_stationary.html">Books & Stationery</a></li>
+                <li><a href="toys_games.html">Toys & Games</a></li>
+                <li><a href="health_personalcare.html">Health & Personal Care</a></li>
+              </ul>
+            </li>
+            <li><a href="contact.html" class="active">Contact</a></li>
+            <li><a href="signin.html" id="logout">Logout</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <h2>Contact Us</h2>
+      <div class="contact-container">
+        <div class="office-details">
+          <h3>Our Office</h3>
+          <p><strong>Address:</strong> 12-48 Check Post Center, Kanuru, Vijayawada, India</p>
+          <p><strong>Mobile:</strong> +91-6302767779</p>
+          <p><strong>Land Line:</strong> +91-9949398788</p>
+          <p><strong>Email:</strong><a href="mailto:ashrafshaik969@gmail.com" title="mailto: ashrafshaik969@gmail.com" style="text-decoration: none;"> ashrafshaik969@gmail.com</a></p>
+        </div>
+        
+        <form id="contact-form" class="contact-form">
+          <input type="text" placeholder="Your Name" required>
+          <input type="email" placeholder="Your Email" required>
+          <textarea placeholder="Your Message" required></textarea>
+          <button type="submit">Submit</button>
+          <p id="form-message"></p>
+        </form>
+      </div>
+
+      <br>
+      <div class="need-help-section">
+        <button class="need-help-btn" onclick="toggleHelpOptions()">Need More Help ☎</button>
+        <div class="help-options" id="helpOptions">
+          <p class="contact-number">Contact us through this number: +91 6302767779</p>
+          <p>Or write your issue below:</p>
+          <textarea placeholder="Describe your issue" id="issueText"></textarea>
+          <button onclick="submitIssue()">Submit Issue</button>
+          <p class="success-message" id="successMessage">Your issue was successfully submitted!</p>
+        </div>
+      </div>
+      
+      <div class="background-element element-1"></div>
+      <div class="background-element element-2"></div>
+    </main>
+
+    <footer>
+      <p>© 2025 ShopMahal</p>
+    </footer>
+  </div>
+
+  <script>
+    function toggleHelpOptions() {
+      const helpOptions = document.getElementById('helpOptions');
+      helpOptions.style.display = helpOptions.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function submitIssue() {
+      const issueText = document.getElementById('issueText').value;
+      const successMessage = document.getElementById('successMessage');
+      if (issueText.trim()) {
+        successMessage.style.display = 'block';
+        document.getElementById('issueText').value = '';
+        setTimeout(() => {
+          successMessage.style.display = 'none';
+        }, 3000); // Hide message after 3 seconds
+      } else {
+        alert('Please describe your issue before submitting.');
+      }
+    }
+  </script>
+  <script src="js/cart.js"></script>
+  <script src="js/contact.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/products_categories.js"></script>
+</body>
+</html>
