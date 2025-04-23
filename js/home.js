@@ -16,7 +16,7 @@ const productData = {
   ],
   prices: [550, 99990, 1699, 106240, 15999, 122900, 69980, 17881, 53999, 12495,86207,54990,3699,299,368,10590,44990,1499,1299,1699,1199,2599,2374,8800,1299,365,299,1299],
   images: [
-    'assests/kurta.webp',
+    'assests/Kurta.webp',
     'assests/Laptop_Lenovo.webp',
     'assests/Headphone_Noise.webp',
     'assests/Watch_Victorinox.webp',
