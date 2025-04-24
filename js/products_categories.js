@@ -43,34 +43,34 @@ const productData = {
     'assests/KALP_book.webp',
   ],
   categories: [
-    ['dress', 'men-wear'], // Collar Kurta
+    ['dress', 'men-wear'], 
     ['electronics'], 
-    ['electronics'], // Noise Airwave Max 4 Wireless Headphones
-    ['accessories'], // Victorinox Stainless Steel Watch
+    ['electronics'], 
+    ['accessories'], 
     ['electronics'],
-    ['electronics'], // iPhone 16 Pro Max 256 GB 5G Mobile Phone
-    ['electronics', 'home-gadgets'], // Haier 596 L, Wi-Fi enabled Water Dispenser Frost Free
-    ['electronics'], // Apple AirPods 4 Wireless Earbuds, Bluetooth Headphones
+    ['electronics'], 
+    ['electronics', 'home-gadgets'], 
+    ['electronics'], 
     ['electronics'],
     ['electronics'],
-    ['electronics', 'home-gadgets'], // LG 15 Kg, AI Direct Drive Technology, Wi-Fi, Steam Fully Automatic Front-Loading Washing Machine
-    ['electronics', 'home-gadgets'], // Hitachi 2 Ton Class 5 Star AC, 4-Way Swing, ice Clean, Xpandable+
-    ['electronics', 'home-gadgets'], // JBL Go 4, Wireless Ultra Portable Bluetooth Speaker
-    ['jewelry', 'accessories'], // Karatcart Women Green American Diamond Stud Earrings
-    ['jewelry', 'accessories'], // ZAVERI PEARLS Ethnic Kundan & Pearls Multi Layers Bridal Necklace Set
-    ['electronics', 'home-gadgets'], // Panasonic 23L Convection Microwave Oven(NN-CT353BFDG,Black Mirror, 360° Heat Wrap, Magic Grill)
-    ['electronics', 'games'], // Sony PS5® Console Video Game Digital - Fortnite Bundle (Slim)
-    ['dress', 'women-wear'], // ShopMahal Brand - Myx Womens Embroidered Kurta Pant Set
-    ['dress', 'women-wear'], // Madame Embossed Cotton Blend Coffee Brown Top
-    ['dress', 'women-wear'], // ShopMahal Womens Woven Design Ethnic Motif Georgette Kanjeevaram Saree
+    ['electronics', 'home-gadgets'], 
+    ['electronics', 'home-gadgets'], 
+    ['electronics', 'home-gadgets'], 
+    ['jewelry', 'accessories'], 
+    ['jewelry', 'accessories'], 
+    ['electronics', 'home-gadgets'], 
+    ['electronics', 'games'], 
+    ['dress', 'women-wear'], 
+    ['dress', 'women-wear'], 
+    ['dress', 'women-wear'], 
     ['footwear'],
-    ['dress', 'men-wear'], // U.S. POLO ASSN. Mens Brown Solid Mid Rise Cotton Button Slim Fit Trousers
-    ['dress', 'men-wear', 'suits'], // MANQ Mens Slim Fit Single Breasted Blazer
-    ['accessories'], // Olivia Burton Ultra Slim Qtz Basic Dial Womens Watch
-    ['electronics', 'home-gadgets'], // Conbre BulbXR 2MP Full HD Indoor Wireless WiFi CCTV Security Camera | Motion Tracking
-    ['toys', 'kids'], // Storio Rechargeable Toys Talking Cactus Baby Toys for Kids Dancing
+    ['dress', 'men-wear'], 
+    ['dress', 'men-wear', 'suits'], 
+    ['accessories'], 
+    ['electronics', 'home-gadgets'], 
+    ['toys', 'kids'], 
     ['beauty'],
-    ['books-stationery'] // KALP 2025 Dated Planner Kit | A5, 400 Pages
+    ['books-stationery'] 
   ]
 };
 
@@ -89,14 +89,40 @@ function updateCartCount() {
   }
 }
 
-function addToCart(name, price) {
+function addToCart(name, price, button) {
   let cart = JSON.parse(localStorage.getItem(getUserKey('cart')) || '[]');
   const existingItem = cart.find(item => item.name === name);
-  if (existingItem) existingItem.quantity += 1;
-  else cart.push({ name, price, quantity: 1 });
+  let quantity = 1;
+
+  if (existingItem) {
+    existingItem.quantity += 1;
+    quantity = existingItem.quantity;
+  } else {
+    cart.push({ name, price, quantity: 1 });
+  }
   localStorage.setItem(getUserKey('cart'), JSON.stringify(cart));
   showNotification(`Added ${name} to cart!`);
   updateCartCount();
+
+  // Replace button with quantity control
+  replaceWithQuantityControl(button, name, quantity);
+}
+
+function updateQuantity(name, newQuantity) {
+  let cart = JSON.parse(localStorage.getItem(getUserKey('cart')) || '[]');
+  const existingItem = cart.find(item => item.name === name);
+
+  if (existingItem) {
+    if (newQuantity <= 0) {
+      cart = cart.filter(item => item.name !== name); // Remove item if quantity is 0 or less
+      showNotification(`${name} removed from cart!`);
+    } else {
+      existingItem.quantity = newQuantity;
+      showNotification(`Updated ${name} quantity to ${newQuantity}!`);
+    }
+    localStorage.setItem(getUserKey('cart'), JSON.stringify(cart));
+    updateCartCount();
+  }
 }
 
 function showNotification(message) {
@@ -109,6 +135,63 @@ function showNotification(message) {
     notification.style.opacity = 0;
     setTimeout(() => notification.style.display = 'none', 500);
   }, 2000);
+}
+
+function replaceWithQuantityControl(button, name, quantity) {
+  const parent = button.parentElement;
+  const quantityControl = document.createElement('div');
+  quantityControl.className = 'quantity-control';
+  quantityControl.innerHTML = `
+    <span class="quantity-minus">-</span>
+    <span class="quantity-value">${quantity}</span>
+    <span class="quantity-plus">+</span>
+  `;
+
+  parent.replaceChild(quantityControl, button);
+
+  // Add event listeners for quantity control
+  const minus = quantityControl.querySelector('.quantity-minus');
+  const plus = quantityControl.querySelector('.quantity-plus');
+  const value = quantityControl.querySelector('.quantity-value');
+
+  minus.addEventListener('click', () => {
+    let currentQuantity = parseInt(value.textContent);
+    if (currentQuantity > 1) {
+      currentQuantity--;
+      value.textContent = currentQuantity;
+      updateQuantity(name, currentQuantity);
+    } else {
+      updateQuantity(name, 0); // Remove item if quantity becomes 0
+      loadProducts(document.body.getAttribute('data-category')); // Reload products to restore "Add to Cart" button
+    }
+  });
+
+  plus.addEventListener('click', () => {
+    let currentQuantity = parseInt(value.textContent);
+    currentQuantity++;
+    value.textContent = currentQuantity;
+    updateQuantity(name, currentQuantity);
+  });
+}
+
+// Function to render the button or quantity control based on cart state
+function renderCartControl(name, price) {
+  let cart = JSON.parse(localStorage.getItem(getUserKey('cart')) || '[]');
+  const existingItem = cart.find(item => item.name === name);
+
+  if (existingItem && existingItem.quantity > 0) {
+    // Item is in cart, render quantity control
+    return `
+      <div class="quantity-control">
+        <span class="quantity-minus">-</span>
+        <span class="quantity-value">${existingItem.quantity}</span>
+        <span class="quantity-plus">+</span>
+      </div>
+    `;
+  } else {
+    // Item not in cart, render Add to Cart button
+    return `<button onclick="addToCart('${name}', ${price}, this)">Add to Cart</button>`;
+  }
 }
 
 function loadProducts(category) {
@@ -132,15 +215,43 @@ function loadProducts(category) {
       product.className = 'product-card';
       product.innerHTML = `
         <div class="content-wrapper">
-          <img src="${productData.images[index]}" alt="${productData.itemNames[index]}">
+          <img src="${productData.images[index]}" alt="${productData.itemNames[index]}" onerror="this.src='assets/placeholder.jpg';">
           <div class="product-info">
             <h3>${productData.itemNames[index]}</h3>
             <p>₹${formatIndianCurrency(productData.prices[index])}</p>
           </div>
         </div>
-        <button onclick="addToCart('${productData.itemNames[index]}', ${productData.prices[index]})">Add to Cart</button>
+        ${renderCartControl(productData.itemNames[index], productData.prices[index])}
       `;
       productList.appendChild(product);
+
+      // Attach event listeners to quantity controls if they exist
+      const quantityControl = product.querySelector('.quantity-control');
+      if (quantityControl) {
+        const minus = quantityControl.querySelector('.quantity-minus');
+        const plus = quantityControl.querySelector('.quantity-plus');
+        const value = quantityControl.querySelector('.quantity-value');
+        const name = productData.itemNames[index];
+
+        minus.addEventListener('click', () => {
+          let currentQuantity = parseInt(value.textContent);
+          if (currentQuantity > 1) {
+            currentQuantity--;
+            value.textContent = currentQuantity;
+            updateQuantity(name, currentQuantity);
+          } else {
+            updateQuantity(name, 0); // Remove item if quantity becomes 0
+            loadProducts(document.body.getAttribute('data-category')); // Reload products
+          }
+        });
+
+        plus.addEventListener('click', () => {
+          let currentQuantity = parseInt(value.textContent);
+          currentQuantity++;
+          value.textContent = currentQuantity;
+          updateQuantity(name, currentQuantity);
+        });
+      }
     });
   }
 }
@@ -176,15 +287,43 @@ function searchProducts() {
       product.className = 'product-card';
       product.innerHTML = `
         <div class="content-wrapper">
-          <img src="${productData.images[index]}" alt="${productData.itemNames[index]}">
+          <img src="${productData.images[index]}" alt="${productData.itemNames[index]}" onerror="this.src='assets/placeholder.jpg';">
           <div class="product-info">
             <h3>${productData.itemNames[index]}</h3>
             <p>₹${formatIndianCurrency(productData.prices[index])}</p>
           </div>
         </div>
-        <button onclick="addToCart('${productData.itemNames[index]}', ${productData.prices[index]})">Add to Cart</button>
+        ${renderCartControl(productData.itemNames[index], productData.prices[index])}
       `;
       productList.appendChild(product);
+
+      // Attach event listeners to quantity controls if they exist
+      const quantityControl = product.querySelector('.quantity-control');
+      if (quantityControl) {
+        const minus = quantityControl.querySelector('.quantity-minus');
+        const plus = quantityControl.querySelector('.quantity-plus');
+        const value = quantityControl.querySelector('.quantity-value');
+        const name = productData.itemNames[index];
+
+        minus.addEventListener('click', () => {
+          let currentQuantity = parseInt(value.textContent);
+          if (currentQuantity > 1) {
+            currentQuantity--;
+            value.textContent = currentQuantity;
+            updateQuantity(name, currentQuantity);
+          } else {
+            updateQuantity(name, 0); // Remove item if quantity becomes 0
+            loadProducts(document.body.getAttribute('data-category')); // Reload products
+          }
+        });
+
+        plus.addEventListener('click', () => {
+          let currentQuantity = parseInt(value.textContent);
+          currentQuantity++;
+          value.textContent = currentQuantity;
+          updateQuantity(name, currentQuantity);
+        });
+      }
     });
   }
 }
@@ -246,6 +385,34 @@ function setupSearch() {
   }
 }
 
+// Set active navigation link
+function setActiveNavLink() {
+  const page = document.body.getAttribute('data-page');
+  const category = document.body.getAttribute('data-category');
+  const navLinks = document.querySelectorAll('.nav-menu a');
+
+  navLinks.forEach(link => {
+    link.classList.remove('active'); // Remove existing active class
+    const href = link.getAttribute('href').split('/').pop() || 'index.html';
+
+    // For products.html and category pages, activate the "Products" dropdown link
+    if (page === 'products' && link.classList.contains('dropbtn')) {
+      link.classList.add('active');
+    }
+
+    // For category pages, also activate the corresponding dropdown sub-link
+    if (page === 'products' && category) {
+      const dropdownLinks = document.querySelectorAll('.dropdown-content a');
+      dropdownLinks.forEach(dLink => {
+        const dHref = dLink.getAttribute('href').split('/').pop();
+        if (dHref === `${category}.html` || (category === 'kids' && dHref === 'kids.html') || (category === 'toys-games' && dHref === 'toys_games.html')) {
+          dLink.classList.add('active');
+        }
+      });
+    }
+  });
+}
+
 // Detect category from data attribute and load products
 document.addEventListener('DOMContentLoaded', () => {
   const category = document.body.getAttribute('data-category');
@@ -256,6 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   updateCartCount();
   setupSearch();
+  setActiveNavLink();
 
   const navToggle = document.querySelector('.nav-toggle');
   const navMenu = document.querySelector('.nav-menu');

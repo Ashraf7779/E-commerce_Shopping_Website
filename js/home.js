@@ -54,6 +54,123 @@ function getUserKey(key) {
   return `${key}_${currentUser}`;
 }
 
+function updateCartCount() {
+  let cart = JSON.parse(localStorage.getItem(getUserKey('cart')) || '[]');
+  const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  const cartCountElement = document.getElementById('cart-count');
+  if (cartCountElement) {
+    cartCountElement.textContent = cartCount > 0 ? cartCount : 0;
+  }
+}
+
+function addToCart(name, price, button) {
+  let cart = JSON.parse(localStorage.getItem(getUserKey('cart')) || '[]');
+  const existingItem = cart.find(item => item.name === name);
+  let quantity = 1;
+
+  if (existingItem) {
+    existingItem.quantity += 1;
+    quantity = existingItem.quantity;
+  } else {
+    cart.push({ name, price, quantity: 1 });
+  }
+  localStorage.setItem(getUserKey('cart'), JSON.stringify(cart));
+  showNotification(`Added ${name} to cart!`);
+  updateCartCount();
+
+  // Replace button with quantity control
+  replaceWithQuantityControl(button, name, quantity);
+}
+
+function updateQuantity(name, newQuantity) {
+  let cart = JSON.parse(localStorage.getItem(getUserKey('cart')) || '[]');
+  const existingItem = cart.find(item => item.name === name);
+
+  if (existingItem) {
+    if (newQuantity <= 0) {
+      cart = cart.filter(item => item.name !== name); // Remove item if quantity is 0 or less
+      showNotification(`${name} removed from cart!`);
+    } else {
+      existingItem.quantity = newQuantity;
+      showNotification(`Updated ${name} quantity to ${newQuantity}!`);
+    }
+    localStorage.setItem(getUserKey('cart'), JSON.stringify(cart));
+    updateCartCount();
+  }
+}
+
+function showNotification(message) {
+  const notification = document.getElementById('cart-notification');
+  if (!notification) {
+    console.error('Notification element not found!');
+    return;
+  }
+  notification.textContent = message;
+  notification.style.display = 'block';
+  notification.style.opacity = 1;
+  setTimeout(() => {
+    notification.style.opacity = 0;
+    setTimeout(() => notification.style.display = 'none', 500);
+  }, 2000);
+}
+
+function replaceWithQuantityControl(button, name, quantity) {
+  const parent = button.parentElement;
+  const quantityControl = document.createElement('div');
+  quantityControl.className = 'quantity-control';
+  quantityControl.innerHTML = `
+    <span class="quantity-minus">-</span>
+    <span class="quantity-value">${quantity}</span>
+    <span class="quantity-plus">+</span>
+  `;
+
+  parent.replaceChild(quantityControl, button);
+
+  // Add event listeners for quantity control
+  const minus = quantityControl.querySelector('.quantity-minus');
+  const plus = quantityControl.querySelector('.quantity-plus');
+  const value = quantityControl.querySelector('.quantity-value');
+
+  minus.addEventListener('click', () => {
+    let currentQuantity = parseInt(value.textContent);
+    if (currentQuantity > 1) {
+      currentQuantity--;
+      value.textContent = currentQuantity;
+      updateQuantity(name, currentQuantity);
+    } else {
+      updateQuantity(name, 0); // Remove item if quantity becomes 0
+      handleCategoryFilter(); // Reload products to restore "Add to Cart" button
+    }
+  });
+
+  plus.addEventListener('click', () => {
+    let currentQuantity = parseInt(value.textContent);
+    currentQuantity++;
+    value.textContent = currentQuantity;
+    updateQuantity(name, currentQuantity);
+  });
+}
+
+// Function to render the button or quantity control based on cart state
+function renderCartControl(name, price) {
+  let cart = JSON.parse(localStorage.getItem(getUserKey('cart')) || '[]');
+  const existingItem = cart.find(item => item.name === name);
+
+  if (existingItem && existingItem.quantity > 0) {
+    // Item is in cart, render quantity control
+    return `
+      <div class="quantity-control">
+        <span class="quantity-minus">-</span>
+        <span class="quantity-value">${existingItem.quantity}</span>
+        <span class="quantity-plus">+</span>
+      </div>
+    `;
+  } else {
+    // Item not in cart, render Add to Cart button
+    return `<button onclick="addToCart('${name}', ${price}, this)">Add to Cart</button>`;
+  }
+}
+
 // Load products based on category or random selection
 function loadProducts(category = null) {
   const productList = document.getElementById('product-list');
@@ -71,7 +188,7 @@ function loadProducts(category = null) {
       .map(item => item.index);
     console.log(`Filtered by category ${category}:`, filteredIndices);
   } else {
-    while (filteredIndices.length < 28) { // Limit to 4 random items
+    while (filteredIndices.length < 28) { // Limit to 28 items
       const randomIndex = Math.floor(Math.random() * productData.itemNames.length);
       if (!filteredIndices.includes(randomIndex)) filteredIndices.push(randomIndex);
     }
@@ -86,15 +203,43 @@ function loadProducts(category = null) {
       product.className = 'product-card';
       product.innerHTML = `
         <div class="content-wrapper">
-          <img src="${productData.images[index]}" alt="${productData.itemNames[index]}">
+          <img src="${productData.images[index]}" alt="${productData.itemNames[index]}" onerror="this.src='assets/placeholder.jpg';">
           <div class="product-info">
             <h3>${productData.itemNames[index]}</h3>
             <p>₹${formatIndianCurrency(productData.prices[index])}</p>
           </div>
         </div>
-        <button onclick="addToCart('${productData.itemNames[index]}', ${productData.prices[index]})">Add to Cart</button>
+        ${renderCartControl(productData.itemNames[index], productData.prices[index])}
       `;
       productList.appendChild(product);
+
+      // Attach event listeners to quantity controls if they exist
+      const quantityControl = product.querySelector('.quantity-control');
+      if (quantityControl) {
+        const minus = quantityControl.querySelector('.quantity-minus');
+        const plus = quantityControl.querySelector('.quantity-plus');
+        const value = quantityControl.querySelector('.quantity-value');
+        const name = productData.itemNames[index];
+
+        minus.addEventListener('click', () => {
+          let currentQuantity = parseInt(value.textContent);
+          if (currentQuantity > 1) {
+            currentQuantity--;
+            value.textContent = currentQuantity;
+            updateQuantity(name, currentQuantity);
+          } else {
+            updateQuantity(name, 0); // Remove item if quantity becomes 0
+            handleCategoryFilter(); // Reload products
+          }
+        });
+
+        plus.addEventListener('click', () => {
+          let currentQuantity = parseInt(value.textContent);
+          currentQuantity++;
+          value.textContent = currentQuantity;
+          updateQuantity(name, currentQuantity);
+        });
+      }
     });
   }
 }
@@ -143,15 +288,43 @@ function searchProducts() {
       product.className = 'product-card';
       product.innerHTML = `
         <div class="content-wrapper">
-          <img src="${productData.images[index]}" alt="${productData.itemNames[index]}">
+          <img src="${productData.images[index]}" alt="${productData.itemNames[index]}" onerror="this.src='assets/placeholder.jpg';">
           <div class="product-info">
             <h3>${productData.itemNames[index]}</h3>
             <p>₹${formatIndianCurrency(productData.prices[index])}</p>
           </div>
         </div>
-        <button onclick="addToCart('${productData.itemNames[index]}', ${productData.prices[index]})">Add to Cart</button>
+        ${renderCartControl(productData.itemNames[index], productData.prices[index])}
       `;
       productList.appendChild(product);
+
+      // Attach event listeners to quantity controls if they exist
+      const quantityControl = product.querySelector('.quantity-control');
+      if (quantityControl) {
+        const minus = quantityControl.querySelector('.quantity-minus');
+        const plus = quantityControl.querySelector('.quantity-plus');
+        const value = quantityControl.querySelector('.quantity-value');
+        const name = productData.itemNames[index];
+
+        minus.addEventListener('click', () => {
+          let currentQuantity = parseInt(value.textContent);
+          if (currentQuantity > 1) {
+            currentQuantity--;
+            value.textContent = currentQuantity;
+            updateQuantity(name, currentQuantity);
+          } else {
+            updateQuantity(name, 0); // Remove item if quantity becomes 0
+            handleCategoryFilter(); // Reload products
+          }
+        });
+
+        plus.addEventListener('click', () => {
+          let currentQuantity = parseInt(value.textContent);
+          currentQuantity++;
+          value.textContent = currentQuantity;
+          updateQuantity(name, currentQuantity);
+        });
+      }
     });
   }
 }
@@ -165,41 +338,6 @@ function setupSearch() {
   const searchIcon = document.querySelector('.search-icon');
   if (searchIcon) {
     searchIcon.addEventListener('click', searchProducts);
-  }
-}
-
-// Cart and user management functions
-function addToCart(name, price) {
-  let cart = JSON.parse(localStorage.getItem(getUserKey('cart')) || '[]');
-  const existingItem = cart.find(item => item.name === name);
-  if (existingItem) existingItem.quantity += 1;
-  else cart.push({ name, price, quantity: 1 });
-  localStorage.setItem(getUserKey('cart'), JSON.stringify(cart));
-  showNotification(`Added ${name} to cart!`);
-  updateCartCount();
-}
-
-function showNotification(message) {
-  const notification = document.getElementById('cart-notification');
-  if (!notification) {
-    console.error('Notification element not found!');
-    return;
-  }
-  notification.textContent = message;
-  notification.style.display = 'block';
-  notification.style.opacity = 1;
-  setTimeout(() => {
-    notification.style.opacity = 0;
-    setTimeout(() => notification.style.display = 'none', 500);
-  }, 2000);
-}
-
-function updateCartCount() {
-  let cart = JSON.parse(localStorage.getItem(getUserKey('cart')) || '[]');
-  const cartCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-  const cartCountElement = document.getElementById('cart-count');
-  if (cartCountElement) {
-    cartCountElement.textContent = cartCount > 0 ? cartCount : 0;
   }
 }
 
@@ -235,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
   handleCategoryFilter();
   updateCartCount();
   setupSearch();
-  setActiveNavLink(); // Add this to set the active link
+  setActiveNavLink();
 
   // Dropdown and hamburger toggle
   const navToggle = document.querySelector('.nav-toggle');

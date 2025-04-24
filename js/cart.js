@@ -1,7 +1,8 @@
-// cart.js
 document.addEventListener('DOMContentLoaded', () => {
   const cartItems = document.getElementById('cart-items');
   const cartTotal = document.getElementById('cart-total');
+  const checkoutBtn = document.getElementById('checkout-btn');
+  const addItemsBtn = document.getElementById('add-items-btn');
   let currentUser = localStorage.getItem('currentUser') || 'guest';
 
   function getUserKey(key) {
@@ -10,9 +11,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const productImages = {
     'Collar Kurta': 'assests/kurta.webp',
-    'Lenovo LOQ 2024, Intel Core i7': 'assests/Laptop_Lenovo.webp',
-    'Noise Airwave Max 4 Wireless Headphones': 'assests/Headphone_Noise.webp',
-    'Victorinox Stainless Steel Watch': 'assests/Watch_Victorinox.webp',
+    'Lenovo LOQ 2024, Intel Core i7': 'assests/laptop_lenovo.webp',
+    'Noise Airwave Max 4 Wireless Headphones': 'assests/headphone_noise.webp',
+    'Victorinox Stainless Steel Watch': 'assests/watch_victorinox.webp',
     'LEQTRONIQ Digital Camera': 'assests/LEQTRONIQ Digital Camera.webp',
     'iPhone 16 Pro Max 256 GB 5G Mobile Phone': 'assests/iPhone 16 Pro Max 256 GB 5G Mobile Phone.webp',
     'Haier 596 L, Wi-Fi enabled Water Dispenser Frost Free': 'assests/Haier 596 L, Wi-Fi enabled Water Dispenser Frost Free.webp',
@@ -20,23 +21,23 @@ document.addEventListener('DOMContentLoaded', () => {
     'Samsung Galaxy Tab S10 FE, S Pen in-Box, 27.7 cm (10.9 inch) LCD Display': 'assests/Samsung Galaxy Tab S10 FE, S Pen in-Box, 27.7 cm (10.9 inch) LCD Display.webp',
     'Logitech G502 X Lightspeed Plus Wireless RGB Gaming Mouse - with LIGHTFORCE': 'assests/Logitech G502 X Lightspeed Plus Wireless RGB Gaming Mouse - with LIGHTFORCE.webp',
     'LG 15 Kg, AI Direct Drive Technology, Wi-Fi, Steam Fully Automatic Front-Loading Washing Machine': 'assests/washing_machine.webp',
-    'Hitachi 2 Ton Class 5 Star AC, 4-Way Swing, ice Clean, Xpandable+':'assests/AC_Hitachi.webp',
-    'JBL Go 4, Wireless Ultra Portable Bluetooth Speaker, Pro Sound':'assests/JBL_Speaker.webp',
-    'Karatcart Women Green American Diamond Stud Earrings':'assests/Karatcart_Earrings.webp',
-    'ZAVERI PEARLS Ethnic Kundan & Pearls Multi Layers Bridal Necklace Set For Women':'assests/Bridal_Necklace.webp',
-    'Panasonic 23L Convection Microwave Oven(NN-CT353BFDG,Black Mirror, 360° Heat Wrap, Magic Grill)':'assests/Micro_Oven.webp',
-    'Sony PS5® Console Video Game Digital - Fortnite Bundle (Slim)':'assests/ps5.webp',
-    'ShopMahal Brand - Myx Womens Embroidered Kurta Pant Set with Organza Dupatta':'assests/women_kurta.webp',
-    'Madame Embossed Cotton Blend Coffee Brown Top for Women':'assests/women_top.webp',
-    'ShopMahal Womens Woven Design Ethnic Motif Georgette Kanjeevaram Saree With Unstiched Blouse Piece':'assests/women_saree.webp',
-    'Campus Artemis Mens Lace-Up Running Shoes':'assests/Campus_Shoe.webp',
-    'U.S. POLO ASSN. Mens Brown Solid Mid Rise Cotton Button Slim Fit Trousers':'assests/us_polo_pantMen.webp',
-    'MANQ Mens Slim Fit Single Breasted Blazer':'assests/Mens_Suite.webp',
-    'Olivia Burton Ultra Slim Qtz Basic Dial Womens Watch':'assests/Womens_watch.webp',
-    'Conbre BulbXR 2MP Full HD Indoor Wireless WiFi CCTV Security Camera | Motion Tracking':'assests/CCtv_Camera.webp',
-    'Storio Rechargeable Toys Talking Cactus Baby Toys for Kids Dancing':'assests/Kids_toy.webp',
-    'HUDA GIRL Beauty Rose Gold Remastered + Nude Edition Eyeshadow Palette Combo Kit - 36 Matte and Shimmer Finishes, Includes Black Eyeshadow':'assests/beauty_pack.webp',
-    'KALP 2025 Dated Planner Kit | A5, 400 Pages':'assests/KALP_book.webp',
+    'Hitachi 2 Ton Class 5 Star AC, 4-Way Swing, ice Clean, Xpandable+': 'assests/ac_hitachi.webp',
+    'JBL Go 4, Wireless Ultra Portable Bluetooth Speaker, Pro Sound': 'assests/jbl_speaker.webp',
+    'Karatcart Women Green American Diamond Stud Earrings': 'assests/karatcart_earrings.webp',
+    'ZAVERI PEARLS Ethnic Kundan & Pearls Multi Layers Bridal Necklace Set For Women': 'assests/bridal_necklace.webp',
+    'Panasonic 23L Convection Microwave Oven(NN-CT353BFDG,Black Mirror, 360° Heat Wrap, Magic Grill)': 'assests/micro_oven.webp',
+    'Sony PS5® Console Video Game Digital - Fortnite Bundle (Slim)': 'assests/ps5.webp',
+    'ShopMahal Brand - Myx Womens Embroidered Kurta Pant Set with Organza Dupatta': 'assests/women_kurta.webp',
+    'Madame Embossed Cotton Blend Coffee Brown Top for Women': 'assests/women_top.webp',
+    'ShopMahal Womens Woven Design Ethnic Motif Georgette Kanjeevaram Saree With Unstiched Blouse Piece': 'assests/women_saree.webp',
+    'Campus Artemis Mens Lace-Up Running Shoes': 'assests/campus_shoe.webp',
+    'U.S. POLO ASSN. Mens Brown Solid Mid Rise Cotton Button Slim Fit Trousers': 'assests/us_polo_pantmen.webp',
+    'MANQ Mens Slim Fit Single Breasted Blazer': 'assests/mens_suite.webp',
+    'Olivia Burton Ultra Slim Qtz Basic Dial Womens Watch': 'assests/womens_watch.webp',
+    'Conbre BulbXR 2MP Full HD Indoor Wireless WiFi CCTV Security Camera | Motion Tracking': 'assests/cctv_camera.webp',
+    'Storio Rechargeable Toys Talking Cactus Baby Toys for Kids Dancing': 'assests/kids_toy.webp',
+    'HUDA GIRL Beauty Rose Gold Remastered + Nude Edition Eyeshadow Palette Combo Kit - 36 Matte and Shimmer Finishes, Includes Black Eyeshadow': 'assests/beauty_pack.webp',
+    'KALP 2025 Dated Planner Kit | A5, 400 Pages': 'assests/kalp_book.webp',
   };
 
   function formatIndianCurrency(amount) {
@@ -51,15 +52,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function displayCart() {
-    if (!cartItems || !cartTotal) {
-      console.error('Cart items or total container not found!');
+    if (!cartItems || !cartTotal || !checkoutBtn || !addItemsBtn) {
+      console.error('Required elements not found!');
       return;
     }
     let cart = JSON.parse(localStorage.getItem(getUserKey('cart'))) || [];
     cartItems.innerHTML = '';
     let total = 0;
+
     if (cart.length === 0) {
       cartItems.innerHTML = '<p class="empty-cart" style="color:black;font-weight:bold;">Your cart is empty.</p>';
+      checkoutBtn.style.display = 'none';
+      addItemsBtn.style.display = 'block';
     } else {
       cart.forEach(item => {
         const itemDiv = document.createElement('div');
@@ -78,6 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
         cartItems.appendChild(itemDiv);
         total += item.price * item.quantity;
       });
+      checkoutBtn.style.display = 'block';
+      addItemsBtn.style.display = 'none';
     }
     cartTotal.textContent = `₹${formatIndianCurrency(total)}`;
     updateCartCount();
@@ -104,6 +110,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     localStorage.setItem(getUserKey('checkoutCart'), JSON.stringify(cart));
     window.location.href = 'checkout.html';
+  };
+
+  window.goToHome = function() {
+    window.location.href = 'index.html';
   };
 
   function updateCartCount() {

@@ -51,7 +51,6 @@
             <li><a href="signin.html" id="logout">Logout</a></li>
           </ul>
         </nav>
-
       </div>
     </header>
 
@@ -61,7 +60,10 @@
         <div id="cart-items" class="cart-items"></div>
         <div class="cart-summary">
           <h3>Total: <span id="cart-total">0</span></h3>
-          <button onclick="checkout()">Checkout</button>
+          <div class="button-group">
+            <button id="checkout-btn" onclick="checkout()">Checkout</button>
+            <button id="add-items-btn" onclick="goToHome()" style="display: none;">Add Items to Cart</button>
+          </div>
         </div>
       </div>
     </main>
