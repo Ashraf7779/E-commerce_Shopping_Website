@@ -75,6 +75,41 @@
     .detail-item span.value {
       flex: 1;
     }
+    .feedback-form {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 15px;
+      text-align: left;
+    }
+    .feedback-form label {
+      display: block;
+      margin-bottom: 5px;
+      color: #2c3e50;
+    }
+    .feedback-form input, .feedback-form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .feedback-form button {
+      padding: 12px 35px;
+      background: #ff6666;
+      color: #fff;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: transform 0.3s ease;
+      width: 100%;
+      max-width: 250px;
+    }
+    .feedback-form button:hover {
+      transform: scale(1.05);
+    }
     button {
       padding: 12px 35px;
       background: #ff6666;
@@ -133,8 +168,16 @@
     <main class="container">
       <div class="confirmation-container">
         <div class="tick-animation">✔</div>
-        <h2>Thank You, Your Order is Successfully Placed!</h2>
+        <h1>Thank You, Your Order is Successfully Placed!</h1>
         <div class="order-details" id="order-details"></div>
+        <div class="feedback-form">
+          <h3>Leave Feedback</h3>
+          <form id="feedback-form">
+            <input type="email" name="email" placeholder="Your email" required>
+            <textarea name="message" placeholder="Your feedback" required></textarea>
+            <button type="submit">Submit Feedback</button>
+          </form>
+        </div>
         <button onclick="continueShopping()">Continue Shopping</button>
       </div>
     </main>
@@ -148,10 +191,68 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <!-- Font Awesome for icons -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <script src="js/cart.js"></script>
-  <script src="js/home.js"></script>
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
+    console.log('Script loaded');
+
+    // Initialize EmailJS with your User ID
+    (function() {
+      try {
+        emailjs.init('3QjGuPThByNX13xNF'); // Your User ID
+        console.log('EmailJS initialized');
+      } catch (e) {
+        console.error('EmailJS initialization failed:', e);
+      }
+    })();
+
+    // Handle form submission with EmailJS
+    const feedbackForm = document.getElementById('feedback-form');
+    if (feedbackForm) {
+      console.log('Feedback form found');
+      feedbackForm.addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+        console.log('Form submitted');
+
+        // Get form data
+        const formData = new FormData(feedbackForm);
+        const email = formData.get('email');
+        const message = formData.get('message');
+        console.log('Form data:', { email, message });
+
+        if (!email || !message) {
+          console.error('Invalid form data:', { email, message });
+          alert('Please fill in all fields.');
+          return;
+        }
+
+        // Send email using EmailJS
+        emailjs.send('service_9w5soef', 'template_8xrp3rp', {
+          email: email,
+          message: message
+        })
+        .then((response) => {
+          console.log('Email sent successfully:', response.status, response.text);
+          alert('Feedback submitted successfully! Check your email for confirmation.');
+        })
+        .catch((error) => {
+          console.error('Error sending email:', error);
+          console.error('Error details:', error.text || error);
+          alert('Failed to send feedback. Please try again or contact support.');
+        })
+        .finally(() => {
+          // Redirect to thankyou.html after email attempt
+          console.log('Redirecting to thankyou.html');
+          window.location.href = 'thankyou.html';
+        });
+      });
+    } else {
+      console.error('Feedback form not found');
+    }
+
+    // Simplified DOMContentLoaded for order details
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded event fired');
       let currentUser = localStorage.getItem('currentUser') || 'guest';
       const orderDetails = document.getElementById('order-details');
 
@@ -163,49 +264,53 @@
       const checkoutData = JSON.parse(localStorage.getItem(getUserKey('checkoutData')) || '{}');
 
       // Display order details
-      orderDetails.innerHTML = `
-        <div class="detail-item">
-          <i class="fas fa-calendar-alt"></i>
-          <span class="label">Estimated Delivery:</span>
-          <span class="value">${checkoutData.deliveryDate || 'Not specified'}</span>
-        </div>
-        <div class="detail-item">
-          <i class="fas fa-map-marker-alt"></i>
-          <span class="label">Delivery Address:</span>
-          <span class="value">${checkoutData.deliveryAddress || 'Not specified'}</span>
-        </div>
-        <div class="detail-item">
-          <i class="fas fa-credit-card"></i>
-          <span class="label">Payment Method:</span>
-          <span class="value">${checkoutData.paymentMode || 'Not specified'}</span>
-        </div>
-        ${checkoutData.paymentMode === 'upi-id' && checkoutData.upiId ? `
+      if (orderDetails) {
+        orderDetails.innerHTML = `
           <div class="detail-item">
-            <i class="fas fa-mobile-alt"></i>
-            <span class="label">UPI ID:</span>
-            <span class="value">${checkoutData.upiId}</span>
-          </div>` : ''}
-        ${checkoutData.paymentMode === 'card' && checkoutData.cardNumber ? `
+            <i class="fas fa-calendar-alt"></i>
+            <span class="label">Estimated Delivery:</span>
+            <span class="value">${checkoutData.deliveryDate || 'Not specified'}</span>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span class="label">Delivery Address:</span>
+            <span class="value">${checkoutData.deliveryAddress || 'Not specified'}</span>
+          </div>
           <div class="detail-item">
             <i class="fas fa-credit-card"></i>
-            <span class="label">Card Number:</span>
-            <span class="value">${checkoutData.cardNumber.replace(/(\d{4})/g, '$1 ').trim()}</span>
-          </div>` : ''}
-      `;
+            <span class="label">Payment Method:</span>
+            <span class="value">${checkoutData.paymentMode || 'Not specified'}</span>
+          </div>
+          ${checkoutData.paymentMode === 'upi-id' && checkoutData.upiId ? `
+            <div class="detail-item">
+              <i class="fas fa-mobile-alt"></i>
+              <span class="label">UPI ID:</span>
+              <span class="value">${checkoutData.upiId}</span>
+            </div>` : ''}
+          ${checkoutData.paymentMode === 'card' && checkoutData.cardNumber ? `
+            <div class="detail-item">
+              <i class="fas fa-credit-card"></i>
+              <span class="label">Card Number:</span>
+              <span class="value">${checkoutData.cardNumber.replace(/(\d{4})/g, '$1 ').trim()}</span>
+            </div>` : ''}
+        `;
+      }
 
       // Clear checkout data
       localStorage.removeItem(`checkoutCart_${currentUser}`);
       localStorage.removeItem(`checkoutData_${currentUser}`);
       localStorage.removeItem(`cart_${currentUser}`);
 
-      updateCartCount();
-
       // Confetti animation
-      confetti({
-        particleCount: 150,
-        spread: 100,
-        origin: { y: 0.6 }
-      });
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.6 }
+        });
+      } else {
+        console.log('Confetti library not loaded');
+      }
     });
 
     window.continueShopping = function() {

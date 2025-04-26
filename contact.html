@@ -28,22 +28,30 @@
       padding: 1.5rem;
       background-color: #f9f9f9;
       border-radius: 4px;
-      max-width: 600px; /* Increased width to match other boxes */
+      max-width: 600px;
       margin-left: auto;
       margin-right: auto;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     .help-options p {
       margin: 0.75rem 0;
-      font-size: 1.2rem; /* Larger font size */
+      font-size: 1.2rem;
     }
     .help-options .contact-number {
-      font-size: 1.4rem; /* Even larger for phone number */
+      font-size: 1.4rem;
       font-weight: bold;
     }
     .help-options textarea {
       width: 100%;
       min-height: 120px;
+      margin-top: 1rem;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1.1rem;
+    }
+    .help-options input[type="email"] {
+      width: 100%;
       margin-top: 1rem;
       padding: 10px;
       border: 1px solid #ccc;
@@ -63,11 +71,14 @@
     .help-options button:hover {
       background-color: #006d93;
     }
-    .success-message {
+    .success-message, .error-message {
       color: #4CAF50;
       margin-top: 0.5rem;
       font-size: 1rem;
       display: none;
+    }
+    .error-message {
+      color: #ff4444;
     }
   </style>
 </head>
@@ -127,15 +138,15 @@
           <p><strong>Address:</strong> 12-48 Check Post Center, Kanuru, Vijayawada, India</p>
           <p><strong>Mobile:</strong> +91-6302767779</p>
           <p><strong>Land Line:</strong> +91-9949398788</p>
-          <p><strong>Email:</strong><a href="mailto:ashrafshaik969@gmail.com" title="mailto: ashrafshaik969@gmail.com" style="text-decoration: none;"> ashrafshaik969@gmail.com</a></p>
+          <p><strong>Email:</strong><a href="mailto:ashrafsk724@gmail.com" title="mailto: ashrafsk724@gmail.com" style="text-decoration: none;"> ashrafsk724@gmail.com</a></p>
         </div>
         
         <form id="contact-form" class="contact-form">
-          <input type="text" placeholder="Your Name" required>
-          <input type="email" placeholder="Your Email" required>
-          <textarea placeholder="Your Message" required></textarea>
+          <input type="text" name="name" placeholder="Your Name" required>
+          <input type="email" name="email" placeholder="Your Email" required>
+          <textarea name="message" placeholder="Your Message" required></textarea>
           <button type="submit">Submit</button>
-          <p id="form-message"></p>
+          <p id="form-message" class="success-message"></p>
         </form>
       </div>
 
@@ -145,9 +156,10 @@
         <div class="help-options" id="helpOptions">
           <p class="contact-number">Contact us through this number: +91 6302767779</p>
           <p>Or write your issue below:</p>
-          <textarea placeholder="Describe your issue" id="issueText"></textarea>
+          <input type="email" id="issueEmail" placeholder="Your Email" required>
+          <textarea placeholder="Describe your issue" id="issueText" required></textarea>
           <button onclick="submitIssue()">Submit Issue</button>
-          <p class="success-message" id="successMessage">Your issue was successfully submitted!</p>
+          <p id="issueMessage" class="success-message"></p>
         </div>
       </div>
       
@@ -160,29 +172,117 @@
     </footer>
   </div>
 
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
+    console.log('Script loaded');
+
+    // Initialize EmailJS with your User ID
+    (function() {
+      try {
+        emailjs.init('9A3AidoRM6UNyowLo');
+        console.log('EmailJS initialized');
+      } catch (e) {
+        console.error('EmailJS initialization failed:', e);
+      }
+    })();
+
+    // Toggle help options
     function toggleHelpOptions() {
       const helpOptions = document.getElementById('helpOptions');
+      const issueMessage = document.getElementById('issueMessage');
       helpOptions.style.display = helpOptions.style.display === 'block' ? 'none' : 'block';
+      if (helpOptions.style.display === 'none') {
+        issueMessage.style.display = 'none'; // Hide success/error message when closing
+      }
     }
 
+    // Submit contact form
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+      console.log('Contact form found');
+      contactForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        console.log('Contact form submitted');
+
+        const formData = new FormData(contactForm);
+        const name = formData.get('name');
+        const email = formData.get('email');
+        const message = formData.get('message');
+        const time = new Date().toLocaleString();
+        console.log('Contact form data:', { name, email, message, time });
+
+        const formMessage = document.getElementById('form-message');
+        if (!name || !email || !message) {
+          formMessage.textContent = 'Please fill in all fields.';
+          formMessage.className = 'error-message';
+          formMessage.style.display = 'block';
+          return;
+        }
+
+        // Show immediate success message
+        formMessage.textContent = 'Submitting...';
+        formMessage.className = 'success-message';
+        formMessage.style.display = 'block';
+
+        emailjs.send('service_mky2fui', 'template_853n4kg', {
+          name: name,
+          email: email,
+          message: message,
+          time: time
+        })
+        .then((response) => {
+          console.log('Contact email sent successfully:', response.status, response.text);
+          formMessage.textContent = 'Contact form submitted successfully! Check your email for confirmation.';
+          contactForm.reset();
+        })
+        .catch((error) => {
+          console.error('Error sending contact email:', error);
+          formMessage.textContent = 'Failed to send contact form. Please try again or contact support.';
+          formMessage.className = 'error-message';
+        });
+      });
+    } else {
+      console.error('Contact form not found');
+    }
+
+    // Submit issue
     function submitIssue() {
       const issueText = document.getElementById('issueText').value;
-      const successMessage = document.getElementById('successMessage');
-      if (issueText.trim()) {
-        successMessage.style.display = 'block';
-        document.getElementById('issueText').value = '';
-        setTimeout(() => {
-          successMessage.style.display = 'none';
-        }, 3000); // Hide message after 3 seconds
+      const issueEmail = document.getElementById('issueEmail').value;
+      const issueMessage = document.getElementById('issueMessage');
+      if (issueText.trim() && issueEmail.trim()) {
+        console.log('Issue submitted:', { issueEmail, issueText });
+
+        const time = new Date().toLocaleString();
+        // Show immediate success message
+        issueMessage.textContent = 'Submitting...';
+        issueMessage.className = 'success-message';
+        issueMessage.style.display = 'block';
+
+        emailjs.send('service_mky2fui', 'template_853n4kg', {
+          name: 'Issue Submission',
+          email: issueEmail,
+          message: issueText,
+          time: time
+        })
+        .then((response) => {
+          console.log('Issue email sent successfully:', response.status, response.text);
+          issueMessage.textContent = 'Issue submitted successfully! Check your email for confirmation.';
+          document.getElementById('issueText').value = '';
+          document.getElementById('issueEmail').value = '';
+        })
+        .catch((error) => {
+          console.error('Error sending issue email:', error);
+          issueMessage.textContent = 'Failed to submit issue. Please try again or contact support.';
+          issueMessage.className = 'error-message';
+        });
       } else {
-        alert('Please describe your issue before submitting.');
+        issueMessage.textContent = 'Please fill in both email and issue description.';
+        issueMessage.className = 'error-message';
+        issueMessage.style.display = 'block';
       }
     }
   </script>
-  <script src="js/cart.js"></script>
-  <script src="js/contact.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/products_categories.js"></script>
 </body>
 </html>
